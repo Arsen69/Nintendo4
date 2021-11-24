@@ -7,8 +7,9 @@ import metier.Achat;
 import metier.Adresse;
 import metier.Boutique;
 import metier.Client;
-import metier.Console;
+import metier.Hybride;
 import metier.Jeu;
+import metier.Salon;
 
 public class Test {
 
@@ -19,8 +20,8 @@ public class Test {
 		List<Achat> achats2 = new ArrayList();
 		
 		
-		Console c1 = new Console("Switch");
-		Console c2 = new Console("GameCube");
+		Hybride c1 = new Hybride("Switch", 300, "2015");
+		Salon c2 = new Salon("GameCube", 120, "2001");
 		
 		Adresse a1 = new Adresse(5, "rue de la Paix", "Monopoly");
 		Adresse a2 = new Adresse(7, "rue Victor Hugo", "Monopoly");
