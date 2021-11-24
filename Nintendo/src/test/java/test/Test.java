@@ -1,5 +1,8 @@
 package test;
 
+import metier.Adresse;
+import metier.Boutique;
+import metier.Client;
 import metier.Console;
 import metier.Jeu;
 
@@ -17,7 +20,10 @@ public class Test {
 		Jeu j4 = new Jeu("Metroid Prime", c2);
 		Jeu j5 = new Jeu("Mario Kart 8", c1);
 		
-		
+		Adresse a = new Adresse (1,"rue","Paris");
+		Boutique b = new Boutique ("Sopra",a);
+		Client cl1 = new Client ("Doe","John");
+		Client cl2 = new Client ("Doe","Jane");
 		
 	}
 
