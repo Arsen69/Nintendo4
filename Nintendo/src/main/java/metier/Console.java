@@ -8,7 +8,6 @@ public abstract class Console {
 	
 
 	public Console(String nom, double prix, String date) {
-		super();
 		this.nom = nom;
 		this.prix = prix;
 		this.date = date;
