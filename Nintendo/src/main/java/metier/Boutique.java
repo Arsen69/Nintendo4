@@ -6,7 +6,6 @@ public class Boutique {
 	private Adresse adresse;
 
 	public Boutique(String nom, Adresse adresse) {
-		super();
 		this.nom = nom;
 		this.adresse = adresse;
 	}
