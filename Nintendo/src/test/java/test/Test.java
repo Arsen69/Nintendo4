@@ -15,7 +15,8 @@ public class Test {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		List<Achat> achats = new ArrayList();
+		List<Achat> achats1 = new ArrayList();
+		List<Achat> achats2 = new ArrayList();
 		
 		
 		Console c1 = new Console("Switch");
@@ -24,8 +25,8 @@ public class Test {
 		Adresse a1 = new Adresse(5, "rue de la Paix", "Monopoly");
 		Adresse a2 = new Adresse(7, "rue Victor Hugo", "Monopoly");
 		
-		Client cl1 = new Client ("Doe","John");
-		Client cl2 = new Client ("Doe","Jane");
+		Client cl1 = new Client ("Doe","John", achats1);
+		Client cl2 = new Client ("Doe","Jane", achats2);
 		Boutique b1 = new Boutique("Gamestop", a1);
 		Boutique b2 = new Boutique("Fnac", a2);
 		
