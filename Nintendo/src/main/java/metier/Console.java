@@ -3,8 +3,8 @@ package metier;
 public abstract class Console {
 
 	protected String nom;
-	private double prix;
-	private String date;
+	protected double prix;
+	protected String date;
 	
 
 	public Console(String nom, double prix, String date) {
@@ -13,7 +13,6 @@ public abstract class Console {
 		this.prix = prix;
 		this.date = date;
 	}
-
 
 	public String getNom() {
 		return nom;
