@@ -50,6 +50,39 @@ body {
   letter-spacing: 0.02em;
 }
 
+.app-header .hat {
+  filter: drop-shadow(0 0 8px rgba(224, 184, 75, 0.6));
+}
+
+.app-header .subtitle {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Accessibility: visible focus ring on every interactive element (none existed before). */
+:focus-visible {
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 2px;
+}
+
+/* Screen-reader-only text (e.g. input labels doubled up with an already-visible player name). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Shared primitives — reused by every game's setup/play/end screens (see STYLE.md). */
 
 .card {
@@ -185,4 +218,183 @@ body {
   color: var(--danger);
   font-size: 0.88rem;
   margin: -6px 0 12px;
+}
+
+.round-info-row {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.input-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
+.input-row .player-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.input-row input[type="number"] {
+  width: 72px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.score-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 100%;
+  font-size: 0.88rem;
+}
+
+table.score-table th,
+table.score-table td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+
+table.score-table thead th {
+  color: var(--gold);
+  font-size: 0.85rem;
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+}
+
+.cell-bidactual {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  display: block;
+}
+
+.cell-score {
+  display: block;
+  font-weight: 700;
+}
+
+.cell-score.positive {
+  color: var(--success);
+}
+
+.cell-score.negative {
+  color: var(--danger);
+}
+
+.cell-total {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+#final-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.rank-row.winner {
+  background: linear-gradient(135deg, rgba(224, 184, 75, 0.25), rgba(224, 184, 75, 0.08));
+  border: 1px solid var(--gold-dark);
+}
+
+.rank-row .rank-position {
+  font-weight: 700;
+  color: var(--gold);
+  min-width: 2em;
+}
+
+.rank-row .rank-name {
+  flex: 1;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.rank-row .rank-score {
+  font-weight: 700;
+}
+
+/* Responsive score table: stacked per-player cards below 640px, a real table above it —
+ * replaces the old single-breakpoint horizontal-scroll-only table. */
+.score-table-wide {
+  display: none;
+}
+
+.score-table-narrow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.round-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.round-card-title {
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.round-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.round-card-row:first-of-type {
+  border-top: none;
+}
+
+.round-card-row .player-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .score-table-wide {
+    display: block;
+  }
+
+  .score-table-narrow {
+    display: none;
+  }
 }

@@ -3,8 +3,8 @@ import { FixturePlayComponent } from './fixture-play.component';
 import { GAME_MANIFEST } from '../../core/game-manifest';
 
 describe('FIXTURE_DEFINITION', () => {
-  it('is listed in GAME_MANIFEST via its meta', () => {
-    expect(GAME_MANIFEST.find((g) => g.id === 'fixture')).toBe(FIXTURE_DEFINITION.meta);
+  it('is not listed in GAME_MANIFEST (dev-only, reachable directly at /games/fixture)', () => {
+    expect(GAME_MANIFEST.find((g) => g.id === 'fixture')).toBeUndefined();
   });
 
   it('totalRounds scales with player count', () => {

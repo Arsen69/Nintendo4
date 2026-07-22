@@ -1,0 +1,15 @@
+<div class="card">
+  <h2>🏆 Fin de la partie</h2>
+  <div id="final-ranking">
+    @for (entry of state.ranking(); track entry.index) {
+      <div class="rank-row" [class.winner]="entry.total === maxScore()">
+        <span class="rank-position">
+          {{ entry.total === maxScore() ? '🏆' : entry.rank + '.' }}
+        </span>
+        <span class="rank-name">{{ state.players()[entry.index] }}</span>
+        <span class="rank-score">{{ entry.total }}</span>
+      </div>
+    }
+  </div>
+  <button type="button" class="btn btn-primary" (click)="newGame()">Nouvelle partie</button>
+</div>

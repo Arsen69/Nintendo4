@@ -7,4 +7,8 @@ export const routes: Routes = [
     path: 'games/fixture',
     loadChildren: () => import('./games/fixture/fixture.routes').then((m) => m.FIXTURE_ROUTES),
   },
+  {
+    path: 'games/wizard',
+    loadChildren: () => import('./games/wizard/wizard.routes').then((m) => m.WIZARD_ROUTES),
+  },
 ];
