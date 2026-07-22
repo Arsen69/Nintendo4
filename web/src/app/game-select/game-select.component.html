@@ -1,0 +1,14 @@
+<header class="app-header">
+  <h1>Score tracking</h1>
+</header>
+
+<div class="game-tiles">
+  @for (game of games; track game.id) {
+    <a class="card game-tile" [routerLink]="['/games', game.id]">
+      @if (game.icon) {
+        <span class="game-tile-icon">{{ game.icon }}</span>
+      }
+      <span class="game-tile-name">{{ game.displayName }}</span>
+    </a>
+  }
+</div>
