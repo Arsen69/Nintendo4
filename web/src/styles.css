@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+/* Design tokens ported from css/style.css — see STYLE.md for the styling decision record. */
+:root {
+  --bg: #1b1330;
+  --bg-gradient: radial-gradient(ellipse at top, #2c1f4a 0%, #150e26 60%, #0d0818 100%);
+  --card-bg: #241a3d;
+  --card-border: #4a3a72;
+  --text: #f1ecff;
+  --text-muted: #a89cc8;
+  --gold: #e0b84b;
+  --gold-dark: #b8912f;
+  --purple: #7c5cbf;
+  --purple-light: #9b7fd6;
+  --success: #4caf82;
+  --danger: #e0637a;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 16px;
+}
+
+@media (min-width: 600px) {
+  body {
+    padding: 32px;
+  }
+}
