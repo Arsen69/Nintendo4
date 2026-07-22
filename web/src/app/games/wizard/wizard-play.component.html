@@ -41,7 +41,7 @@
     <h2>Plis remportés</h2>
     <p class="hint">Une fois la manche jouée, indiquez le nombre de plis remportés par chacun.</p>
     <div class="input-grid">
-      @for (playerIndex of playerIndices(); track playerIndex) {
+      @for (playerIndex of state.biddingOrder(); track playerIndex) {
         <div class="input-row">
           <span class="player-name">
             {{ state.players()[playerIndex] }} (a prédit {{ state.pendingBids()?.[playerIndex] }})
