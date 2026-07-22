@@ -1,12 +1,8 @@
 name: Deploy web/ to GitHub Pages
 
-# Manual trigger only for now: GitHub Pages for this repo is still configured to build
-# from the `main` branch root (serving the legacy vanilla app). Switching the trigger to
-# `push: branches: [main]` is deliberately deferred until the Pages source is flipped to
-# "GitHub Actions" in repo settings, once the Angular app under web/ actually has Wizard
-# working on it (see issue #9) — otherwise every push here would replace the live game
-# with the bare Angular scaffold and/or fail because Pages isn't Actions-enabled yet.
 on:
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
