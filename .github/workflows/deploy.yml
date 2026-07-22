@@ -1,0 +1,49 @@
+name: Deploy web/ to GitHub Pages
+
+# Manual trigger only for now: GitHub Pages for this repo is still configured to build
+# from the `main` branch root (serving the legacy vanilla app). Switching the trigger to
+# `push: branches: [main]` is deliberately deferred until the Pages source is flipped to
+# "GitHub Actions" in repo settings, once the Angular app under web/ actually has Wizard
+# working on it (see issue #9) — otherwise every push here would replace the live game
+# with the bare Angular scaffold and/or fail because Pages isn't Actions-enabled yet.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+      - name: Build
+        working-directory: web
+        run: npx ng build --base-href /Nintendo4/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist/web/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
