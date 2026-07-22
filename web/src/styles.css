@@ -348,57 +348,6 @@ table.score-table thead th {
   font-weight: 700;
 }
 
-/* Responsive score table: stacked per-player cards below 640px, a real table above it —
- * replaces the old single-breakpoint horizontal-scroll-only table. */
-.score-table-wide {
-  display: none;
-}
-
-.score-table-narrow {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.round-card {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  padding: 10px 14px;
-}
-
-.round-card-title {
-  color: var(--gold);
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.round-card-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0;
-  border-top: 1px solid var(--card-border);
-}
-
-.round-card-row:first-of-type {
-  border-top: none;
-}
-
-.round-card-row .player-name {
-  flex: 1;
-  font-weight: 600;
-}
-
-@media (min-width: 640px) {
-  .score-table-wide {
-    display: block;
-  }
-
-  .score-table-narrow {
-    display: none;
-  }
-}
-
 .dialog-backdrop {
   position: fixed;
   inset: 0;

@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 /** Plays a full 4-player Wizard game end to end in a real browser. Covers what the unit/
  *  component test suite can't: actual rendering, the dealer's-bid-restriction UI flow, the
- *  responsive score-table breakpoint, and that the app runs with zero console errors. */
+ *  score table remaining a real table at narrow viewports, and that the app runs with zero
+ *  console errors. */
 test('play a full 4-player Wizard game', async ({ page }) => {
   test.setTimeout(60_000);
   const consoleErrors: string[] = [];
@@ -57,12 +58,12 @@ test('play a full 4-player Wizard game', async ({ page }) => {
   await expect(page.getByText('2 / 15')).toBeVisible();
   await expect(page.locator('.score-table tbody tr')).toHaveCount(1);
 
-  // Responsive score table: wide table hidden, stacked cards shown below 640px.
+  // Score table stays a real table at narrow viewports too (horizontally scrollable).
   await page.setViewportSize({ width: 380, height: 900 });
-  await expect(page.locator('.score-table-wide')).toBeHidden();
-  await expect(page.locator('.score-table-narrow .round-card')).toHaveCount(1);
+  await expect(page.locator('.score-table')).toBeVisible();
+  await expect(page.locator('.score-table tbody tr')).toHaveCount(1);
   await page.setViewportSize({ width: 1024, height: 900 });
-  await expect(page.locator('.score-table-wide')).toBeVisible();
+  await expect(page.locator('.score-table')).toBeVisible();
 
   // Play out the remaining 14 rounds (Alice always wins the trick, everyone bids 0) to
   // reach the end screen (totalRounds = 15 for 4 players; round 1 is already done above).

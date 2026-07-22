@@ -73,7 +73,7 @@
 <div class="card">
   <h2>Tableau des scores</h2>
 
-  <div class="table-wrap score-table-wide">
+  <div class="table-wrap">
     <table class="score-table">
       <thead>
         <tr>
@@ -112,32 +112,6 @@
         }
       </tbody>
     </table>
-  </div>
-
-  <div class="score-table-narrow">
-    @for (entry of roundsWithTotals(); track entry.round.roundNumber) {
-      <div class="round-card">
-        <div class="round-card-title">Manche {{ entry.round.roundNumber }}</div>
-        @for (playerIndex of playerIndices(); track playerIndex) {
-          <div class="round-card-row">
-            <span class="player-name">{{ state.players()[playerIndex] }}</span>
-            <span class="cell-bidactual">
-              {{ entry.round.data.bids[playerIndex] }} → {{ entry.round.data.actual[playerIndex] }}
-            </span>
-            <span
-              class="cell-score"
-              [class.positive]="entry.round.scores[playerIndex] >= 0"
-              [class.negative]="entry.round.scores[playerIndex] < 0"
-            >
-              {{ entry.round.scores[playerIndex] >= 0 ? '+' : '' }}{{ entry.round.scores[playerIndex] }}
-            </span>
-            <span class="cell-total">total {{ entry.totals[playerIndex] }}</span>
-          </div>
-        }
-      </div>
-    } @empty {
-      <p class="hint">Aucune manche jouée pour l'instant.</p>
-    }
   </div>
 
   @if (state.rounds().length > 0) {

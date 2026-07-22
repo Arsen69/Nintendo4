@@ -81,8 +81,8 @@ wiring end to end (not listed in `GAME_MANIFEST`, still reachable directly, stil
   `undoLastRound()` (pops the last completed round back into bidding, scoped to the single most
   recent round — not arbitrary history editing), `newGame()`.
 - `wizard-page`/`wizard-play`/`wizard-end` components — setup (via the shared
-  `PlayerSetupComponent`) → bidding/results/score-table → final ranking. The score table is
-  responsive: stacked per-player round cards below 640px, a real table above it. Bid/actual inputs
+  `PlayerSetupComponent`) → bidding/results/score-table → final ranking. The score table is a single table at all viewport widths (horizontally scrollable
+  via `.table-wrap` on narrow screens, not swapped for stacked cards). Bid/actual inputs
   validate live (out-of-range or a rule violation disables the confirm button and shows an
   `aria-live` message) rather than silently clamping.
 
