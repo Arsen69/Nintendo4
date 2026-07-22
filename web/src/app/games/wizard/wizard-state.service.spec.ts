@@ -119,4 +119,41 @@ describe('WizardStateService', () => {
     expect(service.session()).toBeNull();
     expect(store.load('wizard')).toBeNull();
   });
+
+  it('undoLastRound returns null and does nothing when there are no completed rounds', () => {
+    service.startGame(['Alice', 'Bob', 'Cid']);
+    expect(service.undoLastRound()).toBeNull();
+    expect(service.currentRound()).toBe(1);
+  });
+
+  it('undoLastRound pops the last round back into bidding, returning its original data', () => {
+    service.startGame(['Alice', 'Bob', 'Cid', 'Dan']);
+    service.confirmBids([0, 0, 0, 0]);
+    service.confirmResults([0, 0, 0, 1]); // round 1 committed, scores [20,20,20,-10]
+    expect(service.currentRound()).toBe(2);
+    expect(service.rounds().length).toBe(1);
+
+    const undone = service.undoLastRound();
+    expect(undone?.roundNumber).toBe(1);
+    expect(undone?.data).toEqual({ bids: [0, 0, 0, 0], actual: [0, 0, 0, 1] });
+    expect(undone?.scores).toEqual([20, 20, 20, -10]);
+
+    expect(service.currentRound()).toBe(1);
+    expect(service.phase()).toBe('bidding');
+    expect(service.rounds().length).toBe(0);
+    expect(service.totals()).toEqual([0, 0, 0, 0]);
+  });
+
+  it('the round can be re-played identically after an undo', () => {
+    service.startGame(['Alice', 'Bob', 'Cid', 'Dan']);
+    service.confirmBids([0, 0, 0, 0]);
+    service.confirmResults([0, 0, 0, 1]);
+    service.undoLastRound();
+
+    service.confirmBids([0, 0, 0, 0]);
+    const error = service.confirmResults([0, 0, 0, 1]);
+    expect(error).toBeNull();
+    expect(service.rounds().length).toBe(1);
+    expect(service.currentRound()).toBe(2);
+  });
 });

@@ -29,10 +29,10 @@
         </div>
       }
     </div>
-    @if (error()) {
-      <p class="error" aria-live="polite">{{ error() }}</p>
+    @if (bidsError()) {
+      <p class="error" aria-live="polite">{{ bidsError() }}</p>
     }
-    <button type="button" class="btn btn-primary" (click)="confirmBids()">
+    <button type="button" class="btn btn-primary" [disabled]="!!bidsError()" (click)="confirmBids()">
       Valider les prédictions
     </button>
   </div>
@@ -61,10 +61,10 @@
         </div>
       }
     </div>
-    @if (error()) {
-      <p class="error" aria-live="polite">{{ error() }}</p>
+    @if (actualsError()) {
+      <p class="error" aria-live="polite">{{ actualsError() }}</p>
     }
-    <button type="button" class="btn btn-primary" (click)="confirmResults()">
+    <button type="button" class="btn btn-primary" [disabled]="!!actualsError()" (click)="confirmResults()">
       Valider les résultats
     </button>
   </div>
@@ -139,6 +139,22 @@
       <p class="hint">Aucune manche jouée pour l'instant.</p>
     }
   </div>
+
+  @if (state.rounds().length > 0) {
+    <button type="button" class="btn btn-secondary" (click)="undoLastRound()">
+      Annuler la dernière manche
+    </button>
+  }
 </div>
 
-<button type="button" class="btn btn-secondary" (click)="newGame()">Nouvelle partie</button>
+<button type="button" class="btn btn-secondary" (click)="requestNewGame()">Nouvelle partie</button>
+
+<app-confirm-dialog
+  [open]="showNewGameConfirm()"
+  title="Nouvelle partie"
+  message="Abandonner la partie en cours et recommencer ?"
+  confirmLabel="Abandonner"
+  cancelLabel="Continuer la partie"
+  (confirmed)="confirmNewGame()"
+  (cancelled)="cancelNewGame()"
+/>
