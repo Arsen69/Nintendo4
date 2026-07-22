@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { cumulativeTotals } from '../../core/ranking';
 import { WizardStateService } from './wizard-state.service';
 
@@ -11,8 +11,8 @@ import { WizardStateService } from './wizard-state.service';
 export class WizardPlayComponent {
   protected readonly state = inject(WizardStateService);
 
-  protected readonly bidInputs = signal<number[]>([]);
-  protected readonly actualInputs = signal<number[]>([]);
+  protected readonly bidInputs = signal<number[]>(this.freshInputs());
+  protected readonly actualInputs = signal<number[]>(this.freshInputs());
   protected readonly error = signal<string | null>(null);
 
   protected readonly playerIndices = computed(() => this.state.players().map((_, i) => i));
@@ -25,19 +25,6 @@ export class WizardPlayComponent {
       totals: cumulativeTotals(rounds.slice(0, i + 1), playerCount),
     }));
   });
-
-  constructor() {
-    // Re-initialize the input arrays whenever the round or phase changes (new round,
-    // or bidding -> results), so a fresh set of number inputs starts at zero.
-    effect(() => {
-      const playerCount = this.state.players().length;
-      this.state.currentRound();
-      this.state.phase();
-      this.error.set(null);
-      this.bidInputs.set(new Array(playerCount).fill(0));
-      this.actualInputs.set(new Array(playerCount).fill(0));
-    });
-  }
 
   protected updateBid(playerIndex: number, value: string): void {
     const n = clampToCards(value, this.state.cardsDealt());
@@ -56,11 +43,26 @@ export class WizardPlayComponent {
   protected confirmBids(): void {
     const error = this.state.confirmBids(this.bidInputs());
     this.error.set(error);
+    if (!error) {
+      // Bidding just closed for this round; give the now-visible results phase a fresh,
+      // all-zero input set. Done synchronously here (not via an effect reacting to the
+      // phase signal) so it can't race with the user's next input.
+      this.actualInputs.set(this.freshInputs());
+    }
   }
 
   protected confirmResults(): void {
     const error = this.state.confirmResults(this.actualInputs());
     this.error.set(error);
+    if (!error) {
+      // Round committed and advanced; reset for the next round's bidding phase.
+      this.bidInputs.set(this.freshInputs());
+      this.error.set(null);
+    }
+  }
+
+  private freshInputs(): number[] {
+    return new Array(this.state.players().length).fill(0);
   }
 
   protected newGame(): void {
