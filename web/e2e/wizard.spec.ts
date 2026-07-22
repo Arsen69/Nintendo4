@@ -30,14 +30,15 @@ test('play a full 4-player Wizard game', async ({ page }) => {
 
   // Bidding order for round 1 (dealer seat 0) is Bob, Cid, Dan, Alice — the dealer bids
   // last. Make the total equal cardsDealt (1) to trigger the dealer's-bid restriction.
+  // Validation is live now: the error shows and the button disables without a click.
   const bidInputs = page.locator('.input-row input[type="number"]');
   await bidInputs.nth(0).fill('0'); // Bob
   await bidInputs.nth(1).fill('0'); // Cid
   await bidInputs.nth(2).fill('0'); // Dan
   await bidInputs.nth(3).fill('1'); // Alice (dealer) -- sum == cardsDealt, should be rejected
-  await page.getByRole('button', { name: 'Valider les prédictions' }).click();
   await expect(page.locator('.error')).toContainText('Alice');
   await expect(page.locator('.error')).toContainText('donneur');
+  await expect(page.getByRole('button', { name: 'Valider les prédictions' })).toBeDisabled();
 
   // Fix Alice's bid so the total no longer equals cardsDealt.
   await bidInputs.nth(3).fill('0');

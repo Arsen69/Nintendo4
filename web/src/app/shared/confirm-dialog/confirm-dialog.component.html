@@ -1,0 +1,21 @@
+@if (open()) {
+  <div class="dialog-backdrop" (click)="onCancel()">
+    <div
+      #dialogEl
+      class="card dialog"
+      role="alertdialog"
+      aria-modal="true"
+      [attr.aria-label]="title()"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="onKeydown($event)"
+    >
+      <h2>{{ title() }}</h2>
+      <p>{{ message() }}</p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">{{ cancelLabel() }}</button>
+        <button type="button" class="btn btn-primary" (click)="onConfirm()">{{ confirmLabel() }}</button>
+      </div>
+    </div>
+  </div>
+}

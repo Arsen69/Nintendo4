@@ -11,5 +11,15 @@
       </div>
     }
   </div>
-  <button type="button" class="btn btn-primary" (click)="newGame()">Nouvelle partie</button>
+  <button type="button" class="btn btn-primary" (click)="requestNewGame()">Nouvelle partie</button>
 </div>
+
+<app-confirm-dialog
+  [open]="showRestartConfirm()"
+  title="Nouvelle partie"
+  message="La partie terminée sera définitivement effacée. Recommencer ?"
+  confirmLabel="Recommencer"
+  cancelLabel="Annuler"
+  (confirmed)="confirmNewGame()"
+  (cancelled)="cancelNewGame()"
+/>

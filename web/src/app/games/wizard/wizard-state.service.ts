@@ -119,4 +119,27 @@ export class WizardStateService {
     this.store.clear(WIZARD_META.id);
     this._session.set(null);
   }
+
+  /** Pops the last completed round back into bidding, so a mis-entered bid or trick
+   *  count can be fixed. Deliberately scoped to the single most recent round — not
+   *  arbitrary past-round history editing. Returns the undone round so the caller can
+   *  pre-fill its own input state with the original bids/actual, or null if there was
+   *  nothing to undo. */
+  undoLastRound(): RoundRecord<WizardRoundData> | null {
+    const s = this._session();
+    if (!s || s.rounds.length === 0) {
+      return null;
+    }
+    const last = s.rounds[s.rounds.length - 1];
+    const next: GameSession<WizardRoundData> = {
+      ...s,
+      rounds: s.rounds.slice(0, -1),
+      currentRound: last.roundNumber,
+      phaseIndex: 0,
+      pendingPhaseData: null,
+    };
+    this._session.set(next);
+    this.store.save(WIZARD_META.id, next);
+    return last;
+  }
 }
