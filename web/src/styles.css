@@ -33,3 +33,156 @@ body {
     padding: 32px;
   }
 }
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.app-header h1 {
+  font-size: 1.8rem;
+  margin: 8px 0;
+  letter-spacing: 0.02em;
+}
+
+/* Shared primitives — reused by every game's setup/play/end screens (see STYLE.md). */
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.card h2 {
+  margin-top: 0;
+  color: var(--gold);
+  font-size: 1.15rem;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin: 4px 0 16px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.field > span {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.stepper-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--purple);
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper-btn:not(:disabled):hover {
+  background: var(--purple-light);
+}
+
+.stepper-value {
+  min-width: 1.5em;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.player-names {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.player-names input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.player-names input[type="text"]:focus {
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 1px;
+}
+
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: #241a3d;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+  margin-top: 4px;
+}
+
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--purple-light);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.88rem;
+  margin: -6px 0 12px;
+}

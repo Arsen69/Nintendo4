@@ -1,0 +1,46 @@
+<div class="card">
+  <h2>Joueurs</h2>
+
+  <label class="field">
+    <span>Nombre de joueurs</span>
+    <span class="stepper">
+      <button
+        type="button"
+        class="stepper-btn"
+        [disabled]="playerCount() <= minPlayers()"
+        (click)="decrement()"
+      >
+        −
+      </button>
+      <span class="stepper-value">{{ playerCount() }}</span>
+      <button
+        type="button"
+        class="stepper-btn"
+        [disabled]="playerCount() >= maxPlayers()"
+        (click)="increment()"
+      >
+        +
+      </button>
+    </span>
+  </label>
+
+  <div class="player-names">
+    @for (name of visibleNames(); track $index) {
+      <input
+        type="text"
+        maxlength="24"
+        [placeholder]="'Joueur ' + ($index + 1)"
+        [value]="name"
+        (input)="updateName($index, $any($event.target).value)"
+      />
+    }
+  </div>
+
+  @if (duplicateName()) {
+    <p class="error">Deux joueurs ne peuvent pas avoir le même nom.</p>
+  }
+
+  <button type="button" class="btn btn-primary" [disabled]="!!duplicateName()" (click)="confirm()">
+    Commencer la partie
+  </button>
+</div>
