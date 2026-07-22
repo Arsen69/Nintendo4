@@ -7,6 +7,7 @@
       <button
         type="button"
         class="stepper-btn"
+        aria-label="Diminuer le nombre de joueurs"
         [disabled]="playerCount() <= minPlayers()"
         (click)="decrement()"
       >
@@ -16,6 +17,7 @@
       <button
         type="button"
         class="stepper-btn"
+        aria-label="Augmenter le nombre de joueurs"
         [disabled]="playerCount() >= maxPlayers()"
         (click)="increment()"
       >
@@ -37,7 +39,7 @@
   </div>
 
   @if (duplicateName()) {
-    <p class="error">Deux joueurs ne peuvent pas avoir le même nom.</p>
+    <p class="error" aria-live="polite">Deux joueurs ne peuvent pas avoir le même nom.</p>
   }
 
   <button type="button" class="btn btn-primary" [disabled]="!!duplicateName()" (click)="confirm()">
