@@ -120,40 +120,47 @@ describe('WizardStateService', () => {
     expect(store.load('wizard')).toBeNull();
   });
 
-  it('undoLastRound returns null and does nothing when there are no completed rounds', () => {
-    service.startGame(['Alice', 'Bob', 'Cid']);
-    expect(service.undoLastRound()).toBeNull();
-    expect(service.currentRound()).toBe(1);
+  it('updateRoundData does nothing when the session has no session yet', () => {
+    expect(service.updateRoundData(1, [0], [0])).toBeNull();
   });
 
-  it('undoLastRound pops the last round back into bidding, returning its original data', () => {
+  it('updateRoundData rejects a bid set that triggers the dealer restriction, leaving the round unchanged', () => {
     service.startGame(['Alice', 'Bob', 'Cid', 'Dan']);
     service.confirmBids([0, 0, 0, 0]);
     service.confirmResults([0, 0, 0, 1]); // round 1 committed, scores [20,20,20,-10]
-    expect(service.currentRound()).toBe(2);
-    expect(service.rounds().length).toBe(1);
 
-    const undone = service.undoLastRound();
-    expect(undone?.roundNumber).toBe(1);
-    expect(undone?.data).toEqual({ bids: [0, 0, 0, 0], actual: [0, 0, 0, 1] });
-    expect(undone?.scores).toEqual([20, 20, 20, -10]);
-
-    expect(service.currentRound()).toBe(1);
-    expect(service.phase()).toBe('bidding');
-    expect(service.rounds().length).toBe(0);
-    expect(service.totals()).toEqual([0, 0, 0, 0]);
+    // round 1, dealer is seat 0 (Alice); total bids of 1 == cardsDealt(1)
+    const error = service.updateRoundData(1, [1, 0, 0, 0], [0, 0, 0, 1]);
+    expect(error).toContain('Alice');
+    expect(service.rounds()[0].data.bids).toEqual([0, 0, 0, 0]);
+    expect(service.rounds()[0].scores).toEqual([20, 20, 20, -10]);
   });
 
-  it('the round can be re-played identically after an undo', () => {
+  it('updateRoundData rejects a tricks total that does not match cards dealt', () => {
     service.startGame(['Alice', 'Bob', 'Cid', 'Dan']);
     service.confirmBids([0, 0, 0, 0]);
     service.confirmResults([0, 0, 0, 1]);
-    service.undoLastRound();
 
+    const error = service.updateRoundData(1, [0, 0, 0, 0], [1, 1, 0, 0]); // sums to 2, cardsDealt is 1
+    expect(error).toContain('doit être égal');
+    expect(service.rounds()[0].data.actual).toEqual([0, 0, 0, 1]);
+  });
+
+  it('updateRoundData corrects a past round in place, recomputing its scores and the cumulative totals', () => {
+    service.startGame(['Alice', 'Bob', 'Cid', 'Dan']);
     service.confirmBids([0, 0, 0, 0]);
-    const error = service.confirmResults([0, 0, 0, 1]);
+    service.confirmResults([0, 0, 0, 1]); // round 1: Dan wins, scores [20,20,20,-10]
+    service.confirmBids([0, 0, 0, 0]);
+    service.confirmResults([0, 0, 2, 0]); // round 2 (cardsDealt 2): Cid wins both tricks (bid 0, mismatch)
+
+    // Fix round 1: it was actually Alice who won the trick, not Dan.
+    const error = service.updateRoundData(1, [0, 0, 0, 0], [1, 0, 0, 0]);
     expect(error).toBeNull();
-    expect(service.rounds().length).toBe(1);
-    expect(service.currentRound()).toBe(2);
+    expect(service.rounds()[0].data).toEqual({ bids: [0, 0, 0, 0], actual: [1, 0, 0, 0] });
+    expect(service.rounds()[0].scores).toEqual([-10, 20, 20, 20]);
+    // round 2 untouched, and currentRound/phase unaffected by editing history
+    expect(service.rounds()[1].scores).toEqual([20, 20, -20, 20]);
+    expect(service.currentRound()).toBe(3);
+    expect(service.totals()).toEqual([10, 40, 0, 40]);
   });
 });

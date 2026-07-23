@@ -6,72 +6,12 @@
   </div>
 </div>
 
-@if (state.phase() === 'bidding') {
-  <div class="card">
-    <h2>Prédictions</h2>
-    <p class="hint">Chaque apprenti annonce combien de plis il pense remporter.</p>
-    <div class="input-grid">
-      @for (playerIndex of state.biddingOrder(); track playerIndex) {
-        <div class="input-row">
-          <span class="player-name">{{ state.players()[playerIndex] }}</span>
-          <label class="visually-hidden" [attr.for]="'bid-' + playerIndex">
-            Prédiction de {{ state.players()[playerIndex] }}
-          </label>
-          <input
-            [id]="'bid-' + playerIndex"
-            type="number"
-            min="0"
-            [max]="state.cardsDealt()"
-            step="1"
-            [value]="bidInputs()[playerIndex]"
-            (input)="updateBid(playerIndex, $any($event.target).value)"
-          />
-        </div>
-      }
-    </div>
-    @if (bidsError()) {
-      <p class="error" aria-live="polite">{{ bidsError() }}</p>
-    }
-    <button type="button" class="btn btn-primary" [disabled]="!!bidsError()" (click)="confirmBids()">
-      Valider les prédictions
-    </button>
-  </div>
-} @else {
-  <div class="card">
-    <h2>Plis remportés</h2>
-    <p class="hint">Une fois la manche jouée, indiquez le nombre de plis remportés par chacun.</p>
-    <div class="input-grid">
-      @for (playerIndex of state.biddingOrder(); track playerIndex) {
-        <div class="input-row">
-          <span class="player-name">
-            {{ state.players()[playerIndex] }} (a prédit {{ state.pendingBids()?.[playerIndex] }})
-          </span>
-          <label class="visually-hidden" [attr.for]="'actual-' + playerIndex">
-            Plis remportés par {{ state.players()[playerIndex] }}
-          </label>
-          <input
-            [id]="'actual-' + playerIndex"
-            type="number"
-            min="0"
-            [max]="state.cardsDealt()"
-            step="1"
-            [value]="actualInputs()[playerIndex]"
-            (input)="updateActual(playerIndex, $any($event.target).value)"
-          />
-        </div>
-      }
-    </div>
-    @if (actualsError()) {
-      <p class="error" aria-live="polite">{{ actualsError() }}</p>
-    }
-    <button type="button" class="btn btn-primary" [disabled]="!!actualsError()" (click)="confirmResults()">
-      Valider les résultats
-    </button>
-  </div>
-}
-
 <div class="card">
-  <h2>Tableau des scores</h2>
+  <h2>Feuille de score</h2>
+  <p class="hint">
+    Saisissez la prédiction et les plis remportés de la manche en cours directement dans la
+    dernière ligne du tableau. Cliquez sur le numéro d'une manche passée pour la corriger.
+  </p>
 
   <div class="table-wrap">
     <table class="score-table">
@@ -85,24 +25,79 @@
       </thead>
       <tbody>
         @for (entry of roundsWithTotals(); track entry.round.roundNumber) {
-          <tr>
-            <th>{{ entry.round.roundNumber }}</th>
+          <tr class="round-row">
+            <th>
+              @if (editingRound() === entry.round.roundNumber) {
+                {{ entry.round.roundNumber }}
+              } @else {
+                <button
+                  type="button"
+                  class="round-edit-btn"
+                  [attr.aria-label]="'Modifier la manche ' + entry.round.roundNumber"
+                  (click)="startEdit(entry.round.roundNumber)"
+                >
+                  {{ entry.round.roundNumber }} ✏️
+                </button>
+              }
+            </th>
             @for (playerIndex of playerIndices(); track playerIndex) {
               <td>
-                <span class="cell-bidactual">
-                  {{ entry.round.data.bids[playerIndex] }} → {{ entry.round.data.actual[playerIndex] }}
-                </span>
-                <span
-                  class="cell-score"
-                  [class.positive]="entry.round.scores[playerIndex] >= 0"
-                  [class.negative]="entry.round.scores[playerIndex] < 0"
-                >
-                  {{ entry.round.scores[playerIndex] >= 0 ? '+' : '' }}{{ entry.round.scores[playerIndex] }}
-                </span>
-                <span class="cell-total">total {{ entry.totals[playerIndex] }}</span>
+                @if (editingRound() === entry.round.roundNumber) {
+                  <div class="cell-edit">
+                    <label class="visually-hidden" [attr.for]="'edit-bid-' + entry.round.roundNumber + '-' + playerIndex">
+                      Prédiction de {{ state.players()[playerIndex] }} pour la manche {{ entry.round.roundNumber }}
+                    </label>
+                    <input
+                      [id]="'edit-bid-' + entry.round.roundNumber + '-' + playerIndex"
+                      type="number"
+                      min="0"
+                      [max]="state.cardsDealt()"
+                      step="1"
+                      [value]="editBids()[playerIndex]"
+                      (input)="updateEditBid(playerIndex, $any($event.target).value)"
+                    />
+                    <label class="visually-hidden" [attr.for]="'edit-actual-' + entry.round.roundNumber + '-' + playerIndex">
+                      Plis remportés par {{ state.players()[playerIndex] }} pour la manche {{ entry.round.roundNumber }}
+                    </label>
+                    <input
+                      [id]="'edit-actual-' + entry.round.roundNumber + '-' + playerIndex"
+                      type="number"
+                      min="0"
+                      [max]="state.cardsDealt()"
+                      step="1"
+                      [value]="editActual()[playerIndex]"
+                      (input)="updateEditActual(playerIndex, $any($event.target).value)"
+                    />
+                  </div>
+                } @else {
+                  <span class="cell-bidactual">
+                    {{ entry.round.data.bids[playerIndex] }} → {{ entry.round.data.actual[playerIndex] }}
+                  </span>
+                  <span
+                    class="cell-score"
+                    [class.positive]="entry.round.scores[playerIndex] >= 0"
+                    [class.negative]="entry.round.scores[playerIndex] < 0"
+                  >
+                    {{ entry.round.scores[playerIndex] >= 0 ? '+' : '' }}{{ entry.round.scores[playerIndex] }}
+                  </span>
+                  <span class="cell-total">total {{ entry.totals[playerIndex] }}</span>
+                }
               </td>
             }
           </tr>
+          @if (editingRound() === entry.round.roundNumber) {
+            <tr class="row-controls">
+              <td [attr.colspan]="state.players().length + 1">
+                @if (editError()) {
+                  <p class="error" aria-live="polite">{{ editError() }}</p>
+                }
+                <button type="button" class="btn btn-primary" [disabled]="!!editError()" (click)="saveEdit()">
+                  Enregistrer
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Annuler</button>
+              </td>
+            </tr>
+          }
         } @empty {
           <tr>
             <td [attr.colspan]="state.players().length + 1" class="hint">
@@ -110,15 +105,64 @@
             </td>
           </tr>
         }
+
+        <tr class="current-round-row">
+          <th>{{ state.currentRound() }}</th>
+          @for (playerIndex of playerIndices(); track playerIndex) {
+            <td>
+              <div class="cell-edit">
+                <label class="visually-hidden" [attr.for]="'bid-' + playerIndex">
+                  Prédiction de {{ state.players()[playerIndex] }}
+                </label>
+                <input
+                  [id]="'bid-' + playerIndex"
+                  type="number"
+                  min="0"
+                  [max]="state.cardsDealt()"
+                  step="1"
+                  [disabled]="state.phase() === 'results'"
+                  [value]="bidInputs()[playerIndex]"
+                  (input)="updateBid(playerIndex, $any($event.target).value)"
+                />
+                <label class="visually-hidden" [attr.for]="'actual-' + playerIndex">
+                  Plis remportés par {{ state.players()[playerIndex] }}
+                </label>
+                <input
+                  [id]="'actual-' + playerIndex"
+                  type="number"
+                  min="0"
+                  [max]="state.cardsDealt()"
+                  step="1"
+                  [disabled]="state.phase() === 'bidding'"
+                  [value]="actualInputs()[playerIndex]"
+                  (input)="updateActual(playerIndex, $any($event.target).value)"
+                />
+              </div>
+            </td>
+          }
+        </tr>
+        <tr class="row-controls">
+          <td [attr.colspan]="state.players().length + 1">
+            @if (state.phase() === 'bidding') {
+              @if (bidsError()) {
+                <p class="error" aria-live="polite">{{ bidsError() }}</p>
+              }
+              <button type="button" class="btn btn-primary" [disabled]="!!bidsError()" (click)="confirmBids()">
+                Valider les prédictions
+              </button>
+            } @else {
+              @if (actualsError()) {
+                <p class="error" aria-live="polite">{{ actualsError() }}</p>
+              }
+              <button type="button" class="btn btn-primary" [disabled]="!!actualsError()" (click)="confirmResults()">
+                Valider les résultats
+              </button>
+            }
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
-
-  @if (state.rounds().length > 0) {
-    <button type="button" class="btn btn-secondary" (click)="undoLastRound()">
-      Annuler la dernière manche
-    </button>
-  }
 </div>
 
 <button type="button" class="btn btn-secondary" (click)="requestNewGame()">Nouvelle partie</button>

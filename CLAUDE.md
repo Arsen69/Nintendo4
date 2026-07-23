@@ -81,10 +81,18 @@ wiring end to end (not listed in `GAME_MANIFEST`, still reachable directly, stil
   `undoLastRound()` (pops the last completed round back into bidding, scoped to the single most
   recent round — not arbitrary history editing), `newGame()`.
 - `wizard-page`/`wizard-play`/`wizard-end` components — setup (via the shared
-  `PlayerSetupComponent`) → bidding/results/score-table → final ranking. The score table is a single table at all viewport widths (horizontally scrollable
-  via `.table-wrap` on narrow screens, not swapped for stacked cards). Bid/actual inputs
-  validate live (out-of-range or a rule violation disables the confirm button and shows an
-  `aria-live` message) rather than silently clamping.
+  `PlayerSetupComponent`) → score-sheet → final ranking. The score table is a single table at
+  all viewport widths (horizontally scrollable via `.table-wrap` on narrow screens, not swapped
+  for stacked cards). There are no separate "Prédictions"/"Plis remportés" cards: the current
+  round's bid/actual inputs live directly in the table's last row (`.current-round-row`,
+  always mounted — only the actual inputs' `disabled` state toggles between the bidding/results
+  phases), and any past round can be corrected in place by clicking its round number
+  (`.round-row`, toggles into `editingRound`/`editBids`/`editActual` state in
+  `WizardPlayComponent`), which calls `WizardStateService.updateRoundData()` to re-validate and
+  recompute just that round's scores — cumulative totals/ranking are derived selectors, so
+  editing an old round ripples through automatically. Bid/actual inputs validate live
+  (out-of-range or a rule violation disables the confirm/save button and shows an `aria-live`
+  message) rather than silently clamping.
 
 When modifying scoring, round progression, or validation, `wizard-rules.ts` and
 `wizard-state.service.ts` are the two files to touch — the play/end components are purely
@@ -96,8 +104,9 @@ presentational over `WizardStateService`'s signals.
   `ranking`, `player-name-utils`) and component/service behavior via Angular's `TestBed`, using a
   fake `GameStateStore`/`localStorage` rather than the real browser APIs.
 - `web/e2e/*.spec.ts` (run via `npm run e2e`) drive a real headless Chromium browser end to end —
-  full game playthroughs, the responsive score-table breakpoint, confirm-dialog flows, and asserting
-  zero console errors. Bidding/results panels are structurally swapped (`@if`/`@else`), not updated
-  in place, so e2e tests must wait for the new phase's heading to appear before interacting with its
-  inputs — filling too early can land on the about-to-be-destroyed previous panel and silently lose
-  the input.
+  full game playthroughs, the responsive score-table breakpoint, confirm-dialog flows, editing a
+  past round, and asserting zero console errors. The current-round row stays mounted across the
+  bidding/results phases (only its actual inputs' `disabled` state changes), so there's no
+  DOM-swap to wait out; select its inputs via `input[id^="bid-"]`/`input[id^="actual-"]` (fixed
+  player-column order, not bidding order) rather than a phase-scoped class. A past round's edit
+  inputs use `input[id^="edit-bid-<roundNumber>-"]`/`input[id^="edit-actual-<roundNumber>-"]`.

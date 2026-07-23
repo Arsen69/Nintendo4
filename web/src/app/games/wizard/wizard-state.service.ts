@@ -120,26 +120,35 @@ export class WizardStateService {
     this._session.set(null);
   }
 
-  /** Pops the last completed round back into bidding, so a mis-entered bid or trick
-   *  count can be fixed. Deliberately scoped to the single most recent round — not
-   *  arbitrary past-round history editing. Returns the undone round so the caller can
-   *  pre-fill its own input state with the original bids/actual, or null if there was
-   *  nothing to undo. */
-  undoLastRound(): RoundRecord<WizardRoundData> | null {
+  /** Corrects a completed round's bids/actual in place — any past round, not just the
+   *  most recent one, since the score-sheet-style table lets every row be edited directly.
+   *  Re-validates both fields (the dealer's-bid rule and the tricks-total rule) exactly as
+   *  the original bidding/results phases did, recomputes that round's scores, and leaves
+   *  currentRound/phaseIndex untouched. Returns an error message if rejected, otherwise
+   *  null. */
+  updateRoundData(roundNumber: number, bids: number[], actual: number[]): string | null {
     const s = this._session();
-    if (!s || s.rounds.length === 0) {
+    if (!s) {
       return null;
     }
-    const last = s.rounds[s.rounds.length - 1];
-    const next: GameSession<WizardRoundData> = {
-      ...s,
-      rounds: s.rounds.slice(0, -1),
-      currentRound: last.roundNumber,
-      phaseIndex: 0,
-      pendingPhaseData: null,
-    };
+    const ctx = { players: s.players, roundNumber };
+
+    const bidsError = wizardValidateRoundInput({ bids }, ctx);
+    if (bidsError) {
+      return bidsError;
+    }
+    const actualError = wizardValidateRoundInput({ actual }, ctx);
+    if (actualError) {
+      return actualError;
+    }
+
+    const scores = wizardComputeRoundScores({ bids, actual }, ctx);
+    const rounds = s.rounds.map((r) =>
+      r.roundNumber === roundNumber ? { ...r, data: { bids, actual }, scores } : r,
+    );
+    const next: GameSession<WizardRoundData> = { ...s, rounds };
     this._session.set(next);
     this.store.save(WIZARD_META.id, next);
-    return last;
+    return null;
   }
 }

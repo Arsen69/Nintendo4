@@ -11,10 +11,29 @@ async function startThreePlayerGame(page: import('@playwright/test').Page) {
   await expect(page.getByText('1 / 20')).toBeVisible();
 }
 
+/** Fills the current-round row's bid inputs (fixed player-column order) and confirms. */
+async function fillBids(page: import('@playwright/test').Page, values: string[]) {
+  const bids = page.locator('input[id^="bid-"]');
+  for (let p = 0; p < values.length; p++) {
+    await bids.nth(p).fill(values[p]);
+  }
+  await page.getByRole('button', { name: 'Valider les prédictions' }).click();
+}
+
+/** Fills the current-round row's actual-tricks inputs and confirms. */
+async function fillActual(page: import('@playwright/test').Page, values: string[]) {
+  const actuals = page.locator('input[id^="actual-"]');
+  await expect(actuals.first()).toBeEnabled();
+  for (let p = 0; p < values.length; p++) {
+    await actuals.nth(p).fill(values[p]);
+  }
+  await page.getByRole('button', { name: 'Valider les résultats' }).click();
+}
+
 test('out-of-range bid input shows a visible error and disables confirm', async ({ page }) => {
   await startThreePlayerGame(page);
 
-  const bidInputs = page.locator('.input-row input[type="number"]');
+  const bidInputs = page.locator('input[id^="bid-"]');
   await bidInputs.nth(0).fill('5'); // cardsDealt is 1, so 5 is out of range
   await bidInputs.nth(1).fill('0');
   await bidInputs.nth(2).fill('0');
@@ -52,23 +71,19 @@ test('restarting from the end screen requires confirmation', async ({ page }) =>
   test.setTimeout(60_000);
   await startThreePlayerGame(page);
 
-  // play round 1 (cardsDealt 1) to reach round 2, then undo isn't needed here —
-  // instead we just directly abandon via new game and start a fresh, tiny game by
-  // reusing the same 3 players but this time drive it to completion quickly by
-  // undoing is out of scope; play only what's needed: finish all 20 rounds fast.
+  // finish all 20 rounds fast: everyone bids 0, Alice wins every trick dealt.
   for (let round = 1; round <= 20; round++) {
-    await expect(page.getByRole('heading', { name: 'Prédictions' })).toBeVisible();
-    const bids = page.locator('.input-row input[type="number"]');
+    const bids = page.locator('input[id^="bid-"]');
     const count = await bids.count();
     for (let p = 0; p < count; p++) {
       await bids.nth(p).fill('0');
     }
     await page.getByRole('button', { name: 'Valider les prédictions' }).click();
 
-    await expect(page.getByRole('heading', { name: 'Plis remportés' })).toBeVisible();
+    const actuals = page.locator('input[id^="actual-"]');
+    await expect(actuals.first()).toBeEnabled();
     const cardsDealtText = await page.locator('.round-info-row div').nth(1).innerText();
     const cardsDealt = cardsDealtText.split('\n').pop()!.trim();
-    const actuals = page.locator('.input-row input[type="number"]');
     await actuals.nth(0).fill(cardsDealt);
     for (let p = 1; p < count; p++) {
       await actuals.nth(p).fill('0');
@@ -92,39 +107,47 @@ test('restarting from the end screen requires confirmation', async ({ page }) =>
   await expect(page.getByRole('heading', { name: 'Joueurs' })).toBeVisible();
 });
 
-test('undo last round restores its original bids/actual for editing', async ({ page }) => {
+test('editing a past round recomputes its score and the running totals', async ({ page }) => {
   await startThreePlayerGame(page);
 
-  // round 1 (cardsDealt 1): everyone bids 0, Alice wins the trick (mismatch, -10)
-  const bidInputs = page.locator('.input-row input[type="number"]');
-  await bidInputs.nth(0).fill('0');
-  await bidInputs.nth(1).fill('0');
-  await bidInputs.nth(2).fill('0');
-  await page.getByRole('button', { name: 'Valider les prédictions' }).click();
-  await expect(page.getByRole('heading', { name: 'Plis remportés' })).toBeVisible();
+  // round 1 (cardsDealt 1): everyone bids 0, Cid (seat 2) wins the only trick (mismatch, -10)
+  await fillBids(page, ['0', '0', '0']);
+  await fillActual(page, ['0', '0', '1']);
 
-  const actualInputs = page.locator('.input-row input[type="number"]');
-  await actualInputs.nth(0).fill('1');
-  await actualInputs.nth(1).fill('0');
-  await actualInputs.nth(2).fill('0');
-  await page.getByRole('button', { name: 'Valider les résultats' }).click();
+  // round 2 (cardsDealt 2): everyone bids 0, Bob (seat 1) wins both tricks (mismatch, -20)
+  await fillBids(page, ['0', '0', '0']);
+  await fillActual(page, ['0', '2', '0']);
 
-  await expect(page.getByText('2 / 20')).toBeVisible();
-  await expect(page.locator('.score-table tbody tr')).toHaveCount(1);
+  await expect(page.getByText('3 / 20')).toBeVisible();
+  await expect(page.locator('.score-table tbody tr.round-row')).toHaveCount(2);
 
-  // Undo: back to round 1 bidding, with the original bids pre-filled.
-  await page.getByRole('button', { name: 'Annuler la dernière manche' }).click();
-  await expect(page.getByText('1 / 20')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Prédictions' })).toBeVisible();
-  await expect(page.getByText("Aucune manche jouée pour l'instant.").first()).toBeVisible();
+  // Round 2's total for everyone is 20 (correct bid of 0). Open round 1 for editing and
+  // correct it: it was actually Alice who won the trick, not Cid.
+  await page.getByRole('button', { name: 'Modifier la manche 1' }).click();
+  const editBids = page.locator('input[id^="edit-bid-1-"]');
+  const editActual = page.locator('input[id^="edit-actual-1-"]');
+  await expect(editBids.nth(0)).toHaveValue('0');
+  await expect(editActual.nth(2)).toHaveValue('1'); // Cid's original actual
 
-  const restoredBids = await bidInputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
-  expect(restoredBids).toEqual(['0', '0', '0']);
+  await editActual.nth(2).fill('0'); // Cid no longer wins
+  await editActual.nth(0).fill('1'); // Alice wins instead
+  await page.getByRole('button', { name: 'Enregistrer' }).click();
 
-  // Re-confirm the (unchanged) bids; the results phase should have the original actual
-  // values (1, 0, 0) pre-filled rather than reset to zero.
-  await page.getByRole('button', { name: 'Valider les prédictions' }).click();
-  await expect(page.getByRole('heading', { name: 'Plis remportés' })).toBeVisible();
-  const restoredActual = await actualInputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
-  expect(restoredActual).toEqual(['1', '0', '0']);
+  // Editing closes the row and the score table reflects the corrected round 1 + untouched
+  // round 2. Alice: -10 (round 1, now missed) + 20 (round 2) = 10. Bob: 20 + -20 = 0.
+  // Cid: 20 + 20 = 40.
+  await expect(page.getByRole('button', { name: 'Modifier la manche 1' })).toBeVisible();
+  const scoreTable = page.locator('.score-table');
+  await expect(scoreTable).toContainText('total 10');
+  await expect(scoreTable).toContainText('total 0');
+  await expect(scoreTable).toContainText('total 40');
+
+  // A rejected correction (violates the tricks-total rule) surfaces the same error and
+  // leaves the round unchanged.
+  await page.getByRole('button', { name: 'Modifier la manche 1' }).click();
+  await editActual.nth(0).fill('1');
+  await editActual.nth(1).fill('1'); // sum now 2, cardsDealt for round 1 is 1
+  await expect(page.locator('.error')).toContainText('doit être égal');
+  await expect(page.getByRole('button', { name: 'Enregistrer' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Annuler' }).click();
 });

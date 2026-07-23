@@ -311,6 +311,58 @@ table.score-table thead th {
   color: var(--text-muted);
 }
 
+.round-edit-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.round-edit-btn:hover {
+  color: var(--gold-dark);
+}
+
+.cell-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cell-edit input[type="number"] {
+  width: 56px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.cell-edit input[type="number"]:disabled {
+  opacity: 0.4;
+}
+
+tr.current-round-row th,
+tr.current-round-row td {
+  background: rgba(224, 184, 75, 0.08);
+}
+
+tr.row-controls td {
+  white-space: normal;
+  text-align: left;
+  padding-top: 10px;
+  padding-bottom: 14px;
+}
+
+tr.row-controls .btn {
+  width: auto;
+  display: inline-block;
+  margin-right: 10px;
+}
+
 #final-ranking {
   display: flex;
   flex-direction: column;
